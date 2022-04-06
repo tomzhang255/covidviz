@@ -1,0 +1,14 @@
+Package: covidviz
+Title: COVID Data Visualization
+Version: 0.0.0.9000
+Authors@R: 
+    person("Tom", "Zhang", , "zhangsiyuan777@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: It has a few functions that perform some non-trivial data wrangling and produce plots as results.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
