@@ -68,7 +68,7 @@ world_spdf@data <-
                           NAME == "Wallis and Futuna Islands" ~ "Wallis and Futuna",
                           TRUE ~ NAME))
 
-# ==================== helper functions ====================
+# ==================== helper functions/constants ====================
 
 # a function that returns a function
 transform <- function(log_scale) {
@@ -82,6 +82,14 @@ transform <- function(log_scale) {
 # to prettify plot titles
 fill_name <- function(fill, log_scale) {
   dplyr::if_else(log_scale, base::paste0("log(", fill, ")"), fill)
+}
+
+# get all numeric variables in dataset
+num_vars <- NULL
+for (col in base::names(covid)) {
+  if (base::is.numeric(covid[[col]])) {
+    num_vars <- c(num_vars, col)
+  }
 }
 
 # ==================== query 1 ====================
@@ -458,7 +466,7 @@ query3 <- function(plot_type = "static", fill = "new_cases",
     dplyr::rename(outbreak_start = date)
 
   # suppress loess() warning
-  warn <- getOption("warn")
+  warn <- base::getOption("warn")
   base::options(warn = -1)
 
   # a helper df
@@ -858,5 +866,93 @@ query4 <- function(plot_type = "static", start = "outbreak_start", end = "most_r
       leaflet::labelOptions(pal = palette, values = ~var_agg, opacity = 0.9,
                 title = prettify_aggregate_format(var, func), position = "bottomleft")
 
+  }
+}
+
+# ==================== query 5 ====================
+
+#' Query 5
+#'
+#' Produces a time-series plot of a variable for either one country or multiple countries. Time frame can be a custom argument.
+#'
+#' @param plot_type "static" | "dynamic"
+#' @param var "new_cases" | "new_deaths" | "new_vaccinations" - or any other numeric variable in the OWID COVID dataset found here: \url{https://covid.ourworldindata.org/data/owid-covid-data.csv}
+#' @param country "United States" | "Canada" | "United Kingdom" - or any other country name.
+#' @param start The start date of the time frame; by default (NULL) starts from the first available record in the OWID COVID dataset. Or specify any date string in the format "%m-%d-%Y" such as "05-22-2020".
+#' @param end The end date of the time frame; by default (NULL) includes the most recent record in the OWID COVID dataset. Or specify any date string in the format "%m-%d-%Y" such as "07-22-2021".
+#' @return Either a static map produced with ggplot2 or a dynamic one produced with leaflet.
+#' @export
+query5 <- function(plot_type = "static", var = "new_cases",
+                   country = "United States", start = NULL, end = NULL) {
+
+  # basic argument validation
+  base::stopifnot(plot_type %in% c("static", "dynamic"))
+
+  # advanced argument validation
+  if (!var %in% num_vars) {
+    base::stop(base::paste0("var must be a numeric variable in the covid dataset: ",
+                            base::paste0(num_vars, collapse = ", ")))
+  }
+
+  diff <- base::setdiff(country, base::unique(covid$location))
+
+  if (base::length(diff) > 0) {
+    base::stop(base::paste0("Invalid country name(s): ", base::paste0(diff, collapse = ", ")))
+  }
+
+  validate_date <- function(date, type) {
+    if (!base::is.null(date)) {
+      if (base::is.na(base::as.Date(date, "%m-%d-%Y"))) {
+        base::stop(base::paste0(type, " must be a date string in the format %m-%d-%Y"))
+      }
+    }
+  }
+
+  validate_date(start, "start")
+  validate_date(end, "end")
+
+  # filter country
+  res <-
+    covid %>%
+    dplyr::filter(location %in% country) %>%
+    dplyr::select(location, date, .data[[var]])
+
+  # filter time frame
+  if (!base::is.null(start)) {
+    res <- dplyr::filter(res, date >= base::as.Date(start, format = "%m-%d-%Y"))
+  }
+
+  if (!base::is.null(end)) {
+    res <- dplyr::filter(res, date <= base::as.Date(end, format = "%m-%d-%Y"))
+  }
+
+  # plot
+  if (base::length(country) == 1) {
+    g <- ggplot2::ggplot(res, ggplot2::aes(x = date, y = .data[[var]]))
+  } else {
+    g <- ggplot2::ggplot(res, ggplot2::aes(x = date, y = .data[[var]], color = location))
+  }
+
+  title <- base::paste0("Time-Series Plot of ", var)
+  if (base::length(country) == 1) {
+    title <- base::paste0(title, " for ", country)
+  }
+  subtitle <- base::paste0(base::format(base::min(res$date), "%m/%d/%Y"), " - ",
+                     base::format(base::max(res$date), "%m/%d/%Y"))
+
+  g <-
+    g +
+    ggplot2::geom_line() +
+    ggplot2::theme_bw() +
+    ggplot2::labs(title = title, subtitle = subtitle)
+
+  if (plot_type == "static") {
+    base::options(warn = -1)
+    g
+  } else {
+    # subtitle automatically disappears, here's the fix
+    plotly::ggplotly(g) %>% plotly::layout(hovermode = "x",
+                           title = base::list(text = base::paste0(title, "<br>",
+                                                      "<sup>", subtitle, "</sup>")))
   }
 }

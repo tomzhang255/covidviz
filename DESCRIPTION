@@ -22,4 +22,5 @@ Imports:
     stats,
     magrittr,
     htmltools,
-    stringr
+    stringr,
+    plotly

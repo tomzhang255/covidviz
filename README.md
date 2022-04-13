@@ -6,7 +6,10 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of covidviz is to …
+The goal of covidviz is to provide the user with a set of functions that
+perform some non-trivial data wrangling and produce plots as results on
+the [OWID COVID
+dataset](https://ourworldindata.org/coronavirus-source-data).
 
 ## Installation
 
@@ -20,12 +23,15 @@ devtools::install_github("tomzhang255/covidviz")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+This is an example query:
 
 ``` r
 library(covidviz)
-## basic example code
+
+query1(plot_type = "static", fill = "cases", log_scale = TRUE, projection = "globular")
 ```
+
+<img src="man/figures/README-example-1.png" width="100%" />
 
 What is special about using `README.Rmd` instead of just `README.md`?
 You can include R chunks like so:
