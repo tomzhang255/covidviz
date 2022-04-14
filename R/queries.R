@@ -96,7 +96,9 @@ for (col in base::names(covid)) {
 # although the dynamic plots do not use the "sp" package directly
 # it is a required dependency
 # we're using it here so that it wouldn't get loaded later in the code
-tmp <- sp::merge(base::data.frame(), base::data.frame())
+fix_sp_bug <- function() {
+  tmp <- sp::merge(base::data.frame(), base::data.frame())
+}
 
 # ==================== query 1 ====================
 
@@ -207,6 +209,8 @@ query1 <- function(plot_type = "static", fill = "cases",
       )
 
   } else {
+
+    fix_sp_bug()
 
     world_spdf@data <- dplyr::left_join(world_spdf@data, res, by = c("NAME" = "location"))
 
@@ -369,6 +373,8 @@ query2 <- function(plot_type = "static", fill = "avg_daily_new_cases_pre_vac",
       )
 
   } else {
+
+    fix_sp_bug()
 
     world_spdf@data <- dplyr::left_join(world_spdf@data, res, by = c("NAME" = "location"))
 
@@ -584,6 +590,8 @@ query3 <- function(plot_type = "static", fill = "new_cases",
       )
 
   } else {
+
+    fix_sp_bug()
 
     world_spdf@data <- dplyr::left_join(world_spdf@data, res, by = c("NAME" = "location"))
 
@@ -833,6 +841,8 @@ query4 <- function(plot_type = "static", start = "outbreak_start", end = "most_r
       )
 
   } else {
+
+    fix_sp_bug()
 
     world_spdf@data <- dplyr::left_join(world_spdf@data, res, by = c("NAME" = "location"))
 
