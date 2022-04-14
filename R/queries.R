@@ -73,7 +73,7 @@ world_spdf@data <-
 # a function that returns a function
 transform <- function(log_scale) {
   if (log_scale) {
-    return(log)  # returns a log function
+    return(base::log)  # returns a log function
   } else {
     return(function(x) {x})  # returns an identify function
   }
@@ -140,7 +140,7 @@ query1 <- function(plot_type = "static", fill = "cases",
   first_str_peak <-
     lag_str_index %>%
     dplyr::group_by(location) %>%
-    dplyr::filter(stringency_index < prev_str_index) %>%  # this base::means there is a decrease in str index
+    dplyr::filter(stringency_index < prev_str_index) %>%  # this means there is a decrease in str index
     dplyr::slice(1) %>%  # keep first peak
     dplyr::select(location, prev_date) %>%
     dplyr::rename(date = prev_date) %>%
@@ -157,7 +157,7 @@ query1 <- function(plot_type = "static", fill = "cases",
     dplyr::ungroup()
   # note: as of now (03/21/2022), no country falls within this category; we have excluded NA's
 
-  # a complete base::list of first peak of str index for each country
+  # a complete list of first peak of str index for each country
   fixed_first_str_peak <-
     first_str_peak %>%
     dplyr::bind_rows(corner_str_peak) %>%
@@ -236,7 +236,7 @@ query1 <- function(plot_type = "static", fill = "cases",
           direction = "auto"
         )
       ) %>%
-      leaflet::labelOptions(pal = palette, values = ~vals, opacity = 0.9,
+      leaflet::addLegend(pal = palette, values = ~vals, opacity = 0.9,
                 title = fill_name(fill, log_scale), position = "bottomleft")
 
   }
@@ -304,7 +304,7 @@ query2 <- function(plot_type = "static", fill = "avg_daily_new_cases_pre_vac",
     covid %>%
     dplyr::select(location, date) %>%
     dplyr::group_by(location) %>%
-    dplyr::slice(dplyr::n()) %>%
+    dplyr::slice(n()) %>%
     dplyr::ungroup() %>%
     dplyr::rename(most_recent = date)
 
@@ -314,7 +314,7 @@ query2 <- function(plot_type = "static", fill = "avg_daily_new_cases_pre_vac",
     dplyr::left_join(outbreak_start, by = "location") %>%
     dplyr::left_join(most_recent, by = "location")
 
-  # Suppress dplyr::summarise info
+  # Suppress summarise info
   base::options(dplyr.summarise.inform = FALSE)
 
   res <-
@@ -345,11 +345,10 @@ query2 <- function(plot_type = "static", fill = "avg_daily_new_cases_pre_vac",
 
   if (plot_type == "static") {
 
-
     world_ggplot2 %>%
       dplyr::left_join(res, by = c("region" = "location")) %>%
       ggplot2::ggplot(., ggplot2::aes(x = long, y = lat, group = group)) +
-      ggplot2::geom_polygon(ggplot2::aes(fill = transform(log_scale)(.data[[fill]])), color = "black") +
+      ggplot2::geom_polygon(aes(fill = transform(log_scale)(.data[[fill]])), color = "black") +
       ggplot2::coord_map(projection = projection, xlim = c(-180, 180)) +
       ggplot2::labs(title = base::paste0("World Map of ", fill_name(fill, log_scale), " by Country"),
            subtitle = "From Outbreak Start to Date of First Vaccine Dose Administered",
@@ -371,35 +370,35 @@ query2 <- function(plot_type = "static", fill = "avg_daily_new_cases_pre_vac",
     label <- base::paste0(
       "Country: ", world_spdf@data$NAME, "<br/>",
       "<br/>",
-      "Pre-vaccine: ", format(world_spdf@data$outbreak_start, "%m/%d/%Y"), " - ",
-      format(world_spdf@data$pre_vac_date, "%m/%d/%Y"), "<br/>",
+      "Pre-vaccine: ", base::format(world_spdf@data$outbreak_start, "%m/%d/%Y"), " - ",
+      base::format(world_spdf@data$pre_vac_date, "%m/%d/%Y"), "<br/>",
       "&emsp;Avg Daily New Cases (Pre): ",
-      round(world_spdf@data$avg_daily_new_cases_pre_vac),
+      base::round(world_spdf@data$avg_daily_new_cases_pre_vac),
       "<br/>",
       "&emsp;Confidence Interval (Pre): ", "(",
-      round(world_spdf@data$lower_cases_pre_vac),
-      ", ", round(world_spdf@data$upper_cases_pre_vac), ")", "<br/>",
+      base::round(world_spdf@data$lower_cases_pre_vac),
+      ", ", base::round(world_spdf@data$upper_cases_pre_vac), ")", "<br/>",
       "&emsp;Avg Daily New Deaths (Pre): ",
-      round(world_spdf@data$avg_daily_new_deaths_pre_vac),
+      base::round(world_spdf@data$avg_daily_new_deaths_pre_vac),
       "<br/>",
       "&emsp;Confidence Interval (Pre): ", "(",
-      round(world_spdf@data$lower_deaths_pre_vac),
-      ", ", round(world_spdf@data$upper_deaths_pre_vac), ")", "<br/>",
+      base::round(world_spdf@data$lower_deaths_pre_vac),
+      ", ", base::round(world_spdf@data$upper_deaths_pre_vac), ")", "<br/>",
       "<br/>",
-      "Post-vaccine: ", format(world_spdf@data$vac_date, "%m/%d/%Y"), " - ",
-      format(world_spdf@data$most_recent, "%m/%d/%Y"), "<br/>",
+      "Post-vaccine: ", base::format(world_spdf@data$vac_date, "%m/%d/%Y"), " - ",
+      base::format(world_spdf@data$most_recent, "%m/%d/%Y"), "<br/>",
       "&emsp;Avg Daily New Cases (Post): ",
-      round(world_spdf@data$avg_daily_new_cases_post_vac),
+      base::round(world_spdf@data$avg_daily_new_cases_post_vac),
       "<br/>",
       "&emsp;Confidence Interval (Post): ", "(",
-      round(world_spdf@data$lower_cases_post_vac),
+      base::round(world_spdf@data$lower_cases_post_vac),
       ", ", round(world_spdf@data$upper_cases_post_vac), ")", "<br/>",
       "&emsp;Avg Daily New Deaths (Post): ",
-      round(world_spdf@data$avg_daily_new_deaths_post_vac),
+      base::round(world_spdf@data$avg_daily_new_deaths_post_vac),
       "<br/>",
       "&emsp;Confidence Interval (Post): ", "(",
-      round(world_spdf@data$lower_deaths_post_vac),
-      ", ", round(world_spdf@data$upper_deaths_post_vac), ")", "<br/>") %>%
+      base::round(world_spdf@data$lower_deaths_post_vac),
+      ", ", base::round(world_spdf@data$upper_deaths_post_vac), ")", "<br/>") %>%
       base::lapply(htmltools::HTML)
 
     # palette
@@ -424,7 +423,7 @@ query2 <- function(plot_type = "static", fill = "avg_daily_new_cases_pre_vac",
           direction = "auto"
         )
       ) %>%
-      leaflet::labelOptions(pal = palette, values = ~vals, opacity = 0.9,
+      leaflet::addLegend(pal = palette, values = ~vals, opacity = 0.9,
                 title = fill_name(fill, log_scale), position = "bottomleft")
 
   }
@@ -585,12 +584,12 @@ query3 <- function(plot_type = "static", fill = "new_cases",
     # tooltip text
     label <- base::paste0(
       "Country: ", world_spdf@data$NAME, "<br/>",
-      "Peak 1: ", format(world_spdf@data$date_1, "%m/%d/%Y"), "<br/>",
-      fill, ": ", round(world_spdf@data$var_1), "<br/>",
-      "Peak 2: ", format(world_spdf@data$date_2, "%m/%d/%Y"), "<br/>",
-      fill, ": ", round(world_spdf@data$var_2), "<br/>",
-      "Peak 3: ", format(world_spdf@data$date_3, "%m/%d/%Y"), "<br/>",
-      fill, ": ", round(world_spdf@data$var_3), "<br/>") %>%
+      "Peak 1: ", base::format(world_spdf@data$date_1, "%m/%d/%Y"), "<br/>",
+      fill, ": ", base::round(world_spdf@data$var_1), "<br/>",
+      "Peak 2: ", base::format(world_spdf@data$date_2, "%m/%d/%Y"), "<br/>",
+      fill, ": ", base::round(world_spdf@data$var_2), "<br/>",
+      "Peak 3: ", base::format(world_spdf@data$date_3, "%m/%d/%Y"), "<br/>",
+      fill, ": ", base::round(world_spdf@data$var_3), "<br/>") %>%
       base::lapply(htmltools::HTML)
 
     # palette
@@ -615,7 +614,7 @@ query3 <- function(plot_type = "static", fill = "new_cases",
           direction = "auto"
         )
       ) %>%
-      leaflet::labelOptions(pal = palette, values = ~vals, opacity = 0.9,
+      leaflet::addLegend(pal = palette, values = ~vals, opacity = 0.9,
                 title = base::paste0(fill_name(fill, log_scale), " Top Peak"),
                 position = "bottomleft")
 
@@ -834,14 +833,14 @@ query4 <- function(plot_type = "static", start = "outbreak_start", end = "most_r
     # tooltip text
     label <- base::paste0(
       "Country: ", world_spdf@data$NAME, "<br/>",
-      "Time Frame: ", format(world_spdf@data$date_start, "%m/%d/%Y"), " - ",
-      format(world_spdf@data$date_end, "%m/%d/%Y"), "<br/>",
+      "Time Frame: ", base::format(world_spdf@data$date_start, "%m/%d/%Y"), " - ",
+      base::format(world_spdf@data$date_end, "%m/%d/%Y"), "<br/>",
       prettify_aggregate_format(var, func), ": ", world_spdf@data$var_agg, "<br/>") %>%
       base::lapply(htmltools::HTML)
 
     # palette
-    if (base::sum(base::is.na(world_spdf@data$var_agg)) == nrow(world_spdf@data)) {
-      stop("Invalid timeframe.")
+    if (base::sum(base::is.na(world_spdf@data$var_agg)) == base::nrow(world_spdf@data)) {
+      base::stop("Invalid timeframe.")
     }
 
     palette <- leaflet::colorNumeric("YlOrBr", world_spdf@data$var_agg, na.color = "transparent")
@@ -863,7 +862,7 @@ query4 <- function(plot_type = "static", start = "outbreak_start", end = "most_r
           direction = "auto"
         )
       ) %>%
-      leaflet::labelOptions(pal = palette, values = ~var_agg, opacity = 0.9,
+      leaflet::addLegend(pal = palette, values = ~var_agg, opacity = 0.9,
                 title = prettify_aggregate_format(var, func), position = "bottomleft")
 
   }
