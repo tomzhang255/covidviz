@@ -92,6 +92,12 @@ for (col in base::names(covid)) {
   }
 }
 
+# totally useless - simply a temporary fix for a leaflet bug
+# although the dynamic plots do not use the "sp" package directly
+# it is a required dependency
+# we're using it here so that it wouldn't get loaded later in the code
+tmp <- sp::merge(base::data.frame(), base::data.frame())
+
 # ==================== query 1 ====================
 
 #' Query 1
