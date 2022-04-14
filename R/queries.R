@@ -304,7 +304,7 @@ query2 <- function(plot_type = "static", fill = "avg_daily_new_cases_pre_vac",
     covid %>%
     dplyr::select(location, date) %>%
     dplyr::group_by(location) %>%
-    dplyr::slice(n()) %>%
+    dplyr::slice(dplyr::n()) %>%
     dplyr::ungroup() %>%
     dplyr::rename(most_recent = date)
 

@@ -23,4 +23,5 @@ Imports:
     magrittr,
     htmltools,
     stringr,
-    plotly
+    plotly,
+    sp
