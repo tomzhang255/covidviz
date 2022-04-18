@@ -358,7 +358,7 @@ query2 <- function(plot_type = "static", fill = "avg_daily_new_cases_pre_vac",
     world_ggplot2 %>%
       dplyr::left_join(res, by = c("region" = "location")) %>%
       ggplot2::ggplot(., ggplot2::aes(x = long, y = lat, group = group)) +
-      ggplot2::geom_polygon(aes(fill = transform(log_scale)(.data[[fill]])), color = "black") +
+      ggplot2::geom_polygon(ggplot2::aes(fill = transform(log_scale)(.data[[fill]])), color = "black") +
       ggplot2::coord_map(projection = projection, xlim = c(-180, 180)) +
       ggplot2::labs(title = base::paste0("World Map of ", fill_name(fill, log_scale), " by Country"),
            subtitle = "From Outbreak Start to Date of First Vaccine Dose Administered",
@@ -575,7 +575,7 @@ query3 <- function(plot_type = "static", fill = "new_cases",
       dplyr::left_join(res, by = c("region" = "location")) %>%
       ggplot2::ggplot(., ggplot2::aes(x = long, y = lat, group = group)) +
       ggplot2::geom_polygon(ggplot2::aes(fill = transform(log_scale)(var_1)), color = "black") +
-      ggplot2::coord_map(projection = "mercator", xlim = c(-180, 180)) +
+      ggplot2::coord_map(projection = projection, xlim = c(-180, 180)) +
       ggplot2::labs(title = base::paste0("World Map of ", fill_name(fill, log_scale),
                           " Top Peak by Country"),
            subtitle = "Peaks Identified with loess()",

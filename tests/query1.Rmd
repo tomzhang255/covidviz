@@ -1,0 +1,97 @@
+---
+title: "Query 1 Tests"
+author: "Siyuan (Tom) Zhang"
+date: '2022-04-18'
+output: html_document
+---
+
+## Intro
+
+Because functions give outputs as plots, unit testing would not work; manually testing each function instead.
+
+## Query 1
+
+### Expect success
+
+```{r}
+?query1
+```
+
+```{r}
+query1()
+```
+
+```{r}
+query1(plot_type = "static", fill = "deaths")
+```
+
+```{r}
+query1(plot_type = "static", fill = "days")
+```
+
+```{r}
+query1(plot_type = "static", fill = "cases", log_scale = TRUE)
+```
+
+```{r}
+query1(plot_type = "static", fill = "deaths", log_scale = TRUE)
+```
+
+```{r}
+query1(plot_type = "static", fill = "days", log_scale = TRUE)
+```
+
+```{r}
+query1(projection = "globular")
+```
+
+```{r}
+query1(projection = "gilbert")
+```
+
+```{r}
+query1(plot_type = "dynamic")
+```
+
+```{r}
+query1(plot_type = "dynamic", fill = "deaths")
+```
+
+```{r}
+query1(plot_type = "dynamic", fill = "days")
+```
+
+```{r}
+query1(plot_type = "dynamic", fill = "cases", log_scale = TRUE)
+```
+
+```{r}
+query1(plot_type = "dynamic", fill = "deaths", log_scale = TRUE)
+```
+
+```{r}
+query1(plot_type = "dynamic", fill = "days", log_scale = TRUE)
+```
+
+```{r}
+query1(plot_type = "dynamic", fill = "deaths", log_scale = TRUE, projection = "gilbert")
+# should ignore projection for now
+```
+
+### Expect failuire
+
+```{r}
+query1(plot_type = "null")
+```
+
+```{r}
+query1(fill = 1)
+```
+
+```{r}
+query1(log_scale = 1)
+```
+
+```{r}
+query1(projection = 9)
+```

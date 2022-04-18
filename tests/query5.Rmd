@@ -1,0 +1,72 @@
+---
+title: "Query 5 Tests"
+author: "Siyuan (Tom) Zhang"
+date: '2022-04-18'
+output: html_document
+---
+
+## Intro
+
+Because functions give outputs as plots, unit testing would not work; manually testing each function instead.
+
+## Query 5
+
+### Expect success
+
+```{r}
+?query5
+```
+
+```{r}
+query5()
+```
+
+```{r}
+query5(var = "new_deaths")
+```
+
+```{r}
+query5(var = "new_vaccinations")
+```
+
+```{r}
+query5(country = "Canada")
+```
+
+```{r}
+query5(country = "Iceland")
+```
+
+```{r}
+query5(start = "07-21-2020", end = "08-22-2020")
+```
+
+```{r}
+query5(plot_type = "dynamic", var = "positive_rate")
+```
+
+```{r}
+query5(plot_type = "dynamic", var = "hosp_patients", end = "02-02-2022", country = "United Kingdom")
+```
+
+### Expect failure
+
+```{r}
+query5(plot_type = "new_type")
+```
+
+```{r}
+query5(var = "new_var")
+```
+
+```{r}
+query5(country = "mars")
+```
+
+```{r}
+query5(start = "today")
+```
+
+```{r}
+query5(end = "march, 2020")
+```

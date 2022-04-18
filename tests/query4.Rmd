@@ -1,0 +1,104 @@
+---
+title: "Query 4 Tests"
+author: "Siyuan (Tom) Zhang"
+date: '2022-04-18'
+output: html_document
+---
+
+## Intro
+
+Because functions give outputs as plots, unit testing would not work; manually testing each function instead.
+
+## Query 4
+
+### Expect success
+
+```{r}
+?query4
+```
+
+```{r}
+query4()
+```
+
+```{r}
+query4(start = "05-22-2020", end = "06-22-2020")
+```
+
+```{r}
+query4(start = c("new_cases" = 10000), end = c("new_vaccinations" = 100))
+```
+
+```{r}
+query4(var = "new_deaths")
+```
+
+```{r}
+query4(var = "new_vaccinations")
+```
+
+```{r}
+query4(func = "mean")
+```
+
+```{r}
+query4(var = "new_deaths", func = "median")
+```
+
+```{r}
+query4(var = "new_vaccinations", func = "max")
+```
+
+```{r}
+query4(projection = "gilbert", func = "min")
+```
+
+```{r}
+query4(plot_type = "dynamic")
+```
+
+```{r}
+query4(plot_type = "dynamic", start = c("new_deaths" = 1000), end = c("new_cases" = 10000))
+```
+
+```{r}
+query4(plot_type = "dynamic", start = "07-27-2020", end = "08-28-2020", var = "new_deaths", func = "median", projection = "globular")
+```
+
+### Expect failure
+
+```{r}
+query4(plot_type = 2)
+```
+
+```{r}
+query4(start = "null")
+```
+
+```{r}
+query4(end = "end")
+```
+
+```{r}
+query4(start = "2020")
+```
+
+```{r}
+query4(start = c("new_variable" = 100))
+```
+
+```{r}
+query4(end = c("new_end" = 10))
+```
+
+```{r}
+query4(end = "01-01-2005")
+```
+
+```{r}
+query4(func = "func")
+```
+
+```{r}
+query4(projection = "new_proj")
+```

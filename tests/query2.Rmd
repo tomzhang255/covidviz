@@ -1,0 +1,96 @@
+---
+title: "Query 2 Tests"
+author: "Siyuan (Tom) Zhang"
+date: '2022-04-18'
+output: html_document
+---
+
+## Intro
+
+Because functions give outputs as plots, unit testing would not work; manually testing each function instead.
+
+## Query 2
+
+### Expect success
+
+```{r}
+?query2
+```
+
+```{r}
+query2()
+```
+
+```{r}
+query2(plot_type = "static", fill = "avg_daily_new_cases_post_vac")
+```
+
+```{r}
+query2(plot_type = "static", fill = "avg_daily_new_deaths_pre_vac")
+```
+
+```{r}
+query2(plot_type = "static", fill = "avg_daily_new_deaths_post_vac")
+```
+
+```{r}
+query2(plot_type = "static", fill = "avg_daily_new_cases_pre_vac", log_scale = TRUE)
+```
+
+```{r}
+query2(plot_type = "static", fill = "avg_daily_new_cases_post_vac", log_scale = TRUE)
+```
+
+```{r}
+query2(plot_type = "static", fill = "avg_daily_new_deaths_pre_vac", log_scale = TRUE)
+```
+
+```{r}
+query2(plot_type = "static", fill = "avg_daily_new_deaths_post_vac", log_scale = TRUE)
+```
+
+```{r}
+query2(projection = "globular")
+```
+
+```{r}
+query2(fill = "avg_daily_new_deaths_post_vac", log_scale = TRUE, projection = "gilbert")
+```
+
+```{r}
+query2(plot_type = "dynamic")
+```
+
+```{r}
+query2(plot_type = "dynamic", log_scale = TRUE)
+```
+
+```{r}
+query2(plot_type = "dynamic", fill = "avg_daily_new_cases_post_vac")
+```
+
+```{r}
+query2(plot_type = "dynamic", fill = "avg_daily_new_deaths_pre_vac", log_scale = TRUE)
+```
+
+```{r}
+query2(plot_type = "dynamic", fill = "avg_daily_new_deaths_post_vac", log_scale = TRUE, projection = "globular")
+```
+
+### Expect failure
+
+```{r}
+query2(plot_type = 1)
+```
+
+```{r}
+query2(fill = "null")
+```
+
+```{r}
+query2(log_scale = "t")
+```
+
+```{r}
+query2(projection = "none")
+```

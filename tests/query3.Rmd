@@ -1,0 +1,80 @@
+---
+title: "Query 3 Tests"
+author: "Siyuan (Tom) Zhang"
+date: '2022-04-18'
+output: html_document
+---
+
+## Intro
+
+Because functions give outputs as plots, unit testing would not work; manually testing each function instead.
+
+## Query 3
+
+### Expect success
+
+```{r}
+?query3
+```
+
+```{r}
+query3()
+```
+
+```{r}
+query3(plot_type = "static", fill = "new_deaths")
+```
+
+```{r}
+query3(plot_type = "static", fill = "new_vaccinations")
+```
+
+```{r}
+query3(plot_type = "static", fill = "new_cases", log_scale = TRUE)
+```
+
+```{r}
+query3(plot_type = "static", fill = "new_deaths", log_scale = TRUE)
+```
+
+```{r}
+query3(plot_type = "static", fill = "new_vaccinations", log_scale = TRUE)
+```
+
+```{r}
+query3(projection = "globular")
+```
+
+```{r}
+query3(plot_type = "static", fill = "new_vaccinations", log_scale = TRUE, projection = "gilbert")
+```
+
+```{r}
+query3(plot_type = "dynamic")
+```
+
+```{r}
+query3(plot_type = "dynamic", fill = "new_deaths", log_scale = TRUE)
+```
+
+```{r}
+query3(plot_type = "dynamic", fill = "new_vaccinations", log_scale = TRUE, projection = "gilbert")
+```
+
+### Expect failure
+
+```{r}
+query3(plot_type = "3")
+```
+
+```{r}
+query3(fill = "null")
+```
+
+```{r}
+query3(log_scale = 0)
+```
+
+```{r}
+query3(projection = "new")
+```
