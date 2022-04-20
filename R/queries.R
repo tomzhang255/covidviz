@@ -887,21 +887,22 @@ query4 <- function(plot_type = "static", start = "outbreak_start", end = "most_r
 
 #' Query 5
 #'
-#' Produces a time-series plot of a variable for either one country or multiple countries. Time frame can be a custom argument.
+#' Produces a time-series line plot of a variable for either one country or multiple countries. Time frame can be a custom argument. User has the option to down-sample by grouping time frame by week or month; if that is the case, then either an error bar plot or box plot is produced.
 #'
 #' @param plot_type "static" | "dynamic"
 #' @param var "new_cases" | "new_deaths" | "new_vaccinations" - or any other numeric variable in the OWID COVID dataset found here: \url{https://covid.ourworldindata.org/data/owid-covid-data.csv}
 #' @param country "United States" | "Canada" | "United Kingdom" - or any other country name.
 #' @param start The start date of the time frame; by default (NULL) starts from the first available record in the OWID COVID dataset. Or specify any date string in the format "%m-%d-%Y" such as "05-22-2020".
 #' @param end The end date of the time frame; by default (NULL) includes the most recent record in the OWID COVID dataset. Or specify any date string in the format "%m-%d-%Y" such as "07-22-2021".
-#' @param group_by Further group time frame by: week | month; NULL by default.
+#' @param group_by "week" | "month" - further group time frame by week or month; NULL by default.
+#' @param bar_type "error" | "box" - if argument group_by is specified, produce either an error bar plot or box plot. Default: "error"
 #' @return Either a static map produced with ggplot2 or a dynamic one produced with leaflet.
 #' @export
 query5 <- function(plot_type = "static", var = "new_cases", country = "United States",
-                   start = NULL, end = NULL, group_by = NULL) {
+                   start = NULL, end = NULL, group_by = NULL, bar_type = "error") {
   # basic argument validation
   base::stopifnot(plot_type %in% c("static", "dynamic"),
-                  group_by %in% c("week", "month"))
+            group_by %in% c("week", "month"))
 
   # advanced argument validation
   if (!var %in% num_vars) {
@@ -949,15 +950,15 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
       res %>%
       dplyr::mutate(group = dplyr::case_when(group_by == "week" ~ lubridate::week(date),
                                              group_by == "month" ~ lubridate::month(date)),
-             year = lubridate::year(date),
-             group_in_year = base::paste0(group, "-", year),
-             group_in_year = forcats::as_factor(group_in_year)) %>%
+                    year = lubridate::year(date),
+                    group_in_year = base::paste0(group, "-", year),
+                    group_in_year = forcats::as_factor(group_in_year)) %>%
       dplyr::group_by(location, group_in_year) %>%
       dplyr::summarise(
         span = dplyr::if_else(group_by == "week",
-                       base::paste0(base::format(base::min(date), "%m/%d/%Y"), " - ",
-                                    base::format(base::max(date), "%m/%d/%Y")),
-                       base::as.character(base::unique(group_in_year))),
+                              base::paste0(base::format(base::min(date), "%m/%d/%Y"), " - ",
+                              base::format(max(date), "%m/%d/%Y")),
+                              base::as.character(base::unique(group_in_year))),
         mean_var = base::mean(.data[[var]], na.rm = TRUE),
         s = stats::sd(.data[[var]], na.rm = TRUE),
         n = dplyr::n(),
@@ -965,7 +966,9 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
         upper = mean_var + se,
         lower = mean_var - se,
         min_date = base::min(date),
-        max_date = base::max(date)
+        max_date = base::max(date),
+        date,
+        .data[[var]]
       ) %>%
       dplyr::ungroup()
   }
@@ -974,7 +977,9 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
   if (base::is.null(group_by)) {
     title <- base::paste0("Time-Series Plot of ", var)
   } else {
-    title <- base::paste0("Time Series Error Bars of ", var, " by ", group_by)
+    title <- base::paste0("Time Series ",
+                          dplyr::if_else(bar_type == "error", "Error Bars", "Box Plot"),
+                          " of ", var, " by ", group_by)
   }
   if (base::length(country) == 1) {
     title <- base::paste0(title, " for ", country)
@@ -1009,20 +1014,31 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
       ggplot2::theme_bw() +
       ggplot2::labs(title = title, subtitle = subtitle)
   } else {
-    # error bars
-    if (base::length(country) == 1) {
-      g <- ggplot2::ggplot(res, ggplot2::aes(x = forcats::fct_inorder(span), y = mean_var,
-                    text = tooltip_text(span, upper, mean_var, lower)))
+    if (bar_type == "error") {
+      # error bars
+      if (base::length(country) == 1) {
+        g <- ggplot2::ggplot(res, ggplot2::aes(x = forcats::fct_inorder(span), y = mean_var,
+              text = tooltip_text(span, upper, mean_var, lower)))
+      } else {
+        g <- ggplot2::ggplot(res, ggplot2::aes(x = forcats::fct_inorder(span),
+                                               y = mean_var, color = location,
+              text = tooltip_text(span, upper, mean_var, lower, country = location)))
+      }
+      g <- g +
+        ggplot2::geom_point() +
+        ggplot2::geom_errorbar(ggplot2::aes(ymin = lower, ymax = upper), width = 0.4)
+
     } else {
-      g <- ggplot2::ggplot(res, ggplot2::aes(x = forcats::fct_inorder(span), y = mean_var,
-                                             color = location,
-                    text = tooltip_text(span, upper, mean_var, lower, country = location)))
+      # box plot
+      if (base::length(country) == 1) {
+        g <- ggplot2::ggplot(res, ggplot2::aes(x = span, y = .data[[var]]))
+      } else {
+        g <- ggplot2::ggplot(res, ggplot2::aes(x = span, y = .data[[var]], fill = location))
+      }
+      g <- g + ggplot2::geom_boxplot()
     }
 
-    g <-
-      g +
-      ggplot2::geom_point() +
-      ggplot2::geom_errorbar(ggplot2::aes(ymin = lower, ymax = upper), width = 0.4) +
+    g <- g +
       ggplot2::labs(title = title, subtitle = subtitle, x = group_by, y = var) +
       ggplot2::theme_bw() +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = -45))
@@ -1037,10 +1053,10 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
     base::options(warn = -1)
     g
   } else {
+    base::options(warn = -1)
     # subtitle automatically disappears, here's the fix
-    plotly::ggplotly(g, tooltip = dplyr::if_else(is.null(group_by), "all", "text")) %>%
-      plotly::layout(hovermode = "x",
-                     title = base::list(text = base::paste0(title, "<br>",
-                                                            "<sup>", subtitle, "</sup>")))
+    plotly::ggplotly(g, tooltip = dplyr::if_else(base::is.null(group_by), "all", "text")) %>%
+      plotly::layout(hovermode = dplyr::if_else(bar_type == "error", "x", "closest"),
+                     title = base::list(text = base::paste0(title, "<br>", "<sup>", subtitle, "</sup>")))
   }
 }

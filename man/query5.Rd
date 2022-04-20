@@ -10,7 +10,8 @@ query5(
   country = "United States",
   start = NULL,
   end = NULL,
-  group_by = NULL
+  group_by = NULL,
+  bar_type = "error"
 )
 }
 \arguments{
@@ -24,11 +25,13 @@ query5(
 
 \item{end}{The end date of the time frame; by default (NULL) includes the most recent record in the OWID COVID dataset. Or specify any date string in the format "\%m-\%d-\%Y" such as "07-22-2021".}
 
-\item{group_by}{Further group time frame by: week | month; NULL by default.}
+\item{group_by}{"week" | "month" - further group time frame by week or month; NULL by default.}
+
+\item{bar_type}{"error" | "box" - if argument group_by is specified, produce either an error bar plot or box plot. Default: "error"}
 }
 \value{
 Either a static map produced with ggplot2 or a dynamic one produced with leaflet.
 }
 \description{
-Produces a time-series plot of a variable for either one country or multiple countries. Time frame can be a custom argument.
+Produces a time-series line plot of a variable for either one country or multiple countries. Time frame can be a custom argument. User has the option to down-sample by grouping time frame by week or month; if that is the case, then either an error bar plot or box plot is produced.
 }
