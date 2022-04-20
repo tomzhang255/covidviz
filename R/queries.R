@@ -937,10 +937,10 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
   if (!base::is.null(start)) {
     res <- dplyr::filter(res, date >= base::as.Date(start, format = "%m-%d-%Y"))
   }
-
   if (!base::is.null(end)) {
     res <- dplyr::filter(res, date <= base::as.Date(end, format = "%m-%d-%Y"))
   }
+  res <- dplyr::mutate(res, min_date = base::min(date), max_date = base::max(date))
 
   # group time frame
   if (!base::is.null(group_by)) {
@@ -982,6 +982,18 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
   subtitle <- base::paste0(base::format(base::min(res$min_date), "%m/%d/%Y"), " - ",
                            base::format(base::max(res$max_date), "%m/%d/%Y"))
 
+  # tooltip text
+  tooltip_text <- function(span, upper, mean_var, lower, country = NULL) {
+    text <- base::paste0("Span: ", span,
+                         "\nUpper: ", base::round(upper),
+                         "\nmean(", var, "): ", base::round(mean_var),
+                         "\nLower: ", base::round(lower))
+    if (!base::is.null(country)) {
+      text <- base::paste0("Country: ", country, "\n", text)
+    }
+    return(text)
+  }
+
   # plot line or error bars
   if (base::is.null(group_by)) {
     # line plot
@@ -999,10 +1011,12 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
   } else {
     # error bars
     if (base::length(country) == 1) {
-      g <- ggplot2::ggplot(res, ggplot2::aes(x = forcats::fct_inorder(span), y = mean_var))
+      g <- ggplot2::ggplot(res, ggplot2::aes(x = forcats::fct_inorder(span), y = mean_var,
+                    text = tooltip_text(span, upper, mean_var, lower)))
     } else {
       g <- ggplot2::ggplot(res, ggplot2::aes(x = forcats::fct_inorder(span), y = mean_var,
-                                             color = location))
+                                             color = location,
+                    text = tooltip_text(span, upper, mean_var, lower, country = location)))
     }
 
     g <-
@@ -1023,38 +1037,10 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
     base::options(warn = -1)
     g
   } else {
-    if (!base::is.null(group_by)) {
-
-
-
-      # return(res)
-      # TODO fix tooltips bug
-
-
-
-
-
-      # custom tooltips
-      g <-
-      g %>%
-      plotly::style(text = base::paste0("Span: ", res$span,
-                                        "\nCountry: ", res$location,
-                          "\nUpper: ", base::round(res$upper),
-                          "\nmean(", var, "): ", base::round(res$mean_var),
-                          "\nLower: ", base::round(res$lower)))
-      # remove redundant tooltips
-      if (base::length(country) == 1) {
-        g <- plotly::style(g, hoverinfo = "skip", traces = 2)
-      } else {
-        # traces = -1, -2, -3 (do not skip these)
-        g <- plotly::style(g, hoverinfo = "skip",
-                           traces = base::seq(1, base::length(country)) * -1)
-      }
-    }
-
     # subtitle automatically disappears, here's the fix
-    plotly::ggplotly(g) %>% plotly::layout(hovermode = "x",
-                            title = base::list(text = base::paste0(title, "<br>",
-                                                 "<sup>", subtitle, "</sup>")))
+    plotly::ggplotly(g, tooltip = dplyr::if_else(is.null(group_by), "all", "text")) %>%
+      plotly::layout(hovermode = "x",
+                     title = base::list(text = base::paste0(title, "<br>",
+                                                            "<sup>", subtitle, "</sup>")))
   }
 }

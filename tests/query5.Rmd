@@ -94,10 +94,6 @@ query5(plot_type = "dynamic", var = "new_deaths", country = c("United States", "
        start = "03-28-2020", end = "07-26-2020", group_by = "month")
 ```
 
-
-
-
-
 ### Expect failure
 
 ```{r}
