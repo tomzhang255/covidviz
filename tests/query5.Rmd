@@ -49,6 +49,55 @@ query5(plot_type = "dynamic", var = "positive_rate")
 query5(plot_type = "dynamic", var = "hosp_patients", end = "02-02-2022", country = "United Kingdom")
 ```
 
+```{r}
+query5(plot_type = "dynamic", var = "hosp_patients", end = "02-02-2022", country = "United Kingdom",
+       group_by = "month")
+```
+
+```{r}
+query5(plot_type = "static", var = "hosp_patients", end = "02-02-2022", country = "United Kingdom",
+       group_by = "month")
+```
+
+```{r}
+query5(plot_type = "dynamic", var = "hosp_patients", country = "United Kingdom",
+       start = "05-01-2020", end = "07-01-2020", group_by = "week")
+```
+
+```{r}
+query5(plot_type = "static", var = "hosp_patients", country = "United Kingdom",
+       start = "05-01-2020", end = "07-01-2020", group_by = "week")
+```
+
+```{r}
+query5(plot_type = "static", var = "new_cases", country = c("Greenland", "Iceland", "Switzerland"),
+       start = "01-01-2021", end = "02-01-2021", group_by = "week")
+```
+
+```{r}
+query5(plot_type = "dynamic", var = "new_cases", country = c("Greenland", "Iceland", "Switzerland"),
+       start = "01-01-2021", end = "02-01-2021", group_by = "week")
+```
+
+```{r}
+query5(plot_type = "static", var = "new_deaths", country = c("United States", "Canada"),
+       start = "03-28-2020", end = "07-26-2020", group_by = "month")
+```
+
+```{r}
+query5(plot_type = "dynamic", var = "new_deaths", country = c("United States", "Canada", "China"),
+       start = "03-28-2020", end = "07-26-2020", group_by = "month")
+```
+
+```{r}
+query5(plot_type = "dynamic", var = "new_deaths", country = c("United States", "Canada", "China"),
+       start = "03-28-2020", end = "07-26-2020", group_by = "month")
+```
+
+
+
+
+
 ### Expect failure
 
 ```{r}

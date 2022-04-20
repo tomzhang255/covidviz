@@ -456,7 +456,6 @@ query2 <- function(plot_type = "static", fill = "avg_daily_new_cases_pre_vac",
 #' @export
 query3 <- function(plot_type = "static", fill = "new_cases",
                    log_scale = FALSE, projection = "mercator") {
-
   # basic argument validation
   base::stopifnot(plot_type %in% c("static", "dynamic"),
             fill %in% c("new_cases", "new_deaths", "new_vaccinations"),
@@ -895,13 +894,14 @@ query4 <- function(plot_type = "static", start = "outbreak_start", end = "most_r
 #' @param country "United States" | "Canada" | "United Kingdom" - or any other country name.
 #' @param start The start date of the time frame; by default (NULL) starts from the first available record in the OWID COVID dataset. Or specify any date string in the format "%m-%d-%Y" such as "05-22-2020".
 #' @param end The end date of the time frame; by default (NULL) includes the most recent record in the OWID COVID dataset. Or specify any date string in the format "%m-%d-%Y" such as "07-22-2021".
+#' @param group_by Further group time frame by: week | month; NULL by default.
 #' @return Either a static map produced with ggplot2 or a dynamic one produced with leaflet.
 #' @export
-query5 <- function(plot_type = "static", var = "new_cases",
-                   country = "United States", start = NULL, end = NULL) {
-
+query5 <- function(plot_type = "static", var = "new_cases", country = "United States",
+                   start = NULL, end = NULL, group_by = NULL) {
   # basic argument validation
-  base::stopifnot(plot_type %in% c("static", "dynamic"))
+  base::stopifnot(plot_type %in% c("static", "dynamic"),
+                  group_by %in% c("week", "month"))
 
   # advanced argument validation
   if (!var %in% num_vars) {
@@ -909,10 +909,11 @@ query5 <- function(plot_type = "static", var = "new_cases",
                             base::paste0(num_vars, collapse = ", ")))
   }
 
-  diff <- base::setdiff(country, base::unique(covid$location))
+  diff <- dplyr::setdiff(country, base::unique(covid$location))
 
   if (base::length(diff) > 0) {
-    base::stop(base::paste0("Invalid country name(s): ", base::paste0(diff, collapse = ", ")))
+    base::stop(base::paste0("Invalid country name(s): ",
+                            base::paste0(diff, collapse = ", ")))
   }
 
   validate_date <- function(date, type) {
@@ -941,33 +942,119 @@ query5 <- function(plot_type = "static", var = "new_cases",
     res <- dplyr::filter(res, date <= base::as.Date(end, format = "%m-%d-%Y"))
   }
 
-  # plot
-  if (base::length(country) == 1) {
-    g <- ggplot2::ggplot(res, ggplot2::aes(x = date, y = .data[[var]]))
-  } else {
-    g <- ggplot2::ggplot(res, ggplot2::aes(x = date, y = .data[[var]], color = location))
+  # group time frame
+  if (!base::is.null(group_by)) {
+    base::options(dplyr.summarise.inform = FALSE)
+    res <-
+      res %>%
+      dplyr::mutate(group = dplyr::case_when(group_by == "week" ~ lubridate::week(date),
+                                             group_by == "month" ~ lubridate::month(date)),
+             year = lubridate::year(date),
+             group_in_year = base::paste0(group, "-", year),
+             group_in_year = forcats::as_factor(group_in_year)) %>%
+      dplyr::group_by(location, group_in_year) %>%
+      dplyr::summarise(
+        span = dplyr::if_else(group_by == "week",
+                       base::paste0(base::format(base::min(date), "%m/%d/%Y"), " - ",
+                                    base::format(base::max(date), "%m/%d/%Y")),
+                       base::as.character(base::unique(group_in_year))),
+        mean_var = base::mean(.data[[var]], na.rm = TRUE),
+        s = stats::sd(.data[[var]], na.rm = TRUE),
+        n = dplyr::n(),
+        se = s / base::sqrt(n),
+        upper = mean_var + se,
+        lower = mean_var - se,
+        min_date = base::min(date),
+        max_date = base::max(date)
+      ) %>%
+      dplyr::ungroup()
   }
 
-  title <- base::paste0("Time-Series Plot of ", var)
+  # plot title
+  if (base::is.null(group_by)) {
+    title <- base::paste0("Time-Series Plot of ", var)
+  } else {
+    title <- base::paste0("Time Series Error Bars of ", var, " by ", group_by)
+  }
   if (base::length(country) == 1) {
     title <- base::paste0(title, " for ", country)
   }
-  subtitle <- base::paste0(base::format(base::min(res$date), "%m/%d/%Y"), " - ",
-                     base::format(base::max(res$date), "%m/%d/%Y"))
+  subtitle <- base::paste0(base::format(base::min(res$min_date), "%m/%d/%Y"), " - ",
+                           base::format(base::max(res$max_date), "%m/%d/%Y"))
 
-  g <-
-    g +
-    ggplot2::geom_line() +
-    ggplot2::theme_bw() +
-    ggplot2::labs(title = title, subtitle = subtitle)
+  # plot line or error bars
+  if (base::is.null(group_by)) {
+    # line plot
+    if (base::length(country) == 1) {
+      g <- ggplot2::ggplot(res, ggplot2::aes(x = date, y = .data[[var]]))
+    } else {
+      g <- ggplot2::ggplot(res, ggplot2::aes(x = date, y = .data[[var]], color = location))
+    }
 
+    g <-
+      g +
+      ggplot2::geom_line() +
+      ggplot2::theme_bw() +
+      ggplot2::labs(title = title, subtitle = subtitle)
+  } else {
+    # error bars
+    if (base::length(country) == 1) {
+      g <- ggplot2::ggplot(res, ggplot2::aes(x = forcats::fct_inorder(span), y = mean_var))
+    } else {
+      g <- ggplot2::ggplot(res, ggplot2::aes(x = forcats::fct_inorder(span), y = mean_var,
+                                             color = location))
+    }
+
+    g <-
+      g +
+      ggplot2::geom_point() +
+      ggplot2::geom_errorbar(ggplot2::aes(ymin = lower, ymax = upper), width = 0.4) +
+      ggplot2::labs(title = title, subtitle = subtitle, x = group_by, y = var) +
+      ggplot2::theme_bw() +
+      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = -45))
+  }
+
+  # plot type
   if (plot_type == "static") {
+    if (!base::is.null(group_by)) {
+      # fix x-axis text position
+      g <- g + ggplot2::theme(axis.text.x = ggplot2::element_text(hjust = 0))
+    }
     base::options(warn = -1)
     g
   } else {
+    if (!base::is.null(group_by)) {
+
+
+
+      # return(res)
+      # TODO fix tooltips bug
+
+
+
+
+
+      # custom tooltips
+      g <-
+      g %>%
+      plotly::style(text = base::paste0("Span: ", res$span,
+                                        "\nCountry: ", res$location,
+                          "\nUpper: ", base::round(res$upper),
+                          "\nmean(", var, "): ", base::round(res$mean_var),
+                          "\nLower: ", base::round(res$lower)))
+      # remove redundant tooltips
+      if (base::length(country) == 1) {
+        g <- plotly::style(g, hoverinfo = "skip", traces = 2)
+      } else {
+        # traces = -1, -2, -3 (do not skip these)
+        g <- plotly::style(g, hoverinfo = "skip",
+                           traces = base::seq(1, base::length(country)) * -1)
+      }
+    }
+
     # subtitle automatically disappears, here's the fix
     plotly::ggplotly(g) %>% plotly::layout(hovermode = "x",
-                           title = base::list(text = base::paste0(title, "<br>",
-                                                      "<sup>", subtitle, "</sup>")))
+                            title = base::list(text = base::paste0(title, "<br>",
+                                                 "<sup>", subtitle, "</sup>")))
   }
 }

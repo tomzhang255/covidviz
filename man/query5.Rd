@@ -9,7 +9,8 @@ query5(
   var = "new_cases",
   country = "United States",
   start = NULL,
-  end = NULL
+  end = NULL,
+  group_by = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ query5(
 \item{start}{The start date of the time frame; by default (NULL) starts from the first available record in the OWID COVID dataset. Or specify any date string in the format "\%m-\%d-\%Y" such as "05-22-2020".}
 
 \item{end}{The end date of the time frame; by default (NULL) includes the most recent record in the OWID COVID dataset. Or specify any date string in the format "\%m-\%d-\%Y" such as "07-22-2021".}
+
+\item{group_by}{Further group time frame by: week | month; NULL by default.}
 }
 \value{
 Either a static map produced with ggplot2 or a dynamic one produced with leaflet.
