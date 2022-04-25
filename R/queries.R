@@ -100,6 +100,42 @@ fix_sp_bug <- function() {
   tmp <- sp::merge(base::data.frame(), base::data.frame())
 }
 
+validate_date <- function(date, type) {
+  if (!base::is.null(date)) {
+    if (base::is.na(base::as.Date(date, "%m-%d-%Y"))) {
+      base::stop(base::paste0(type, " must be a date string in the format %m-%d-%Y"))
+    }
+  }
+}
+
+validate_num_var <- function(var) {
+  if (!var %in% num_vars) {
+    base::stop(var, base::paste0(" must be a numeric variable in the covid dataset: ",
+                                 base::paste0(num_vars, collapse = ", ")))
+  }
+}
+
+validate_country <- function(country) {
+  diff <- dplyr::setdiff(country, base::unique(covid$location))
+
+  if (length(diff) > 0) {
+    base::stop(base::paste0("Invalid country name(s): ",
+                            base::paste0(diff, collapse = ", ")))
+  }
+}
+
+filter_time_frame <- function(res, start, end) {
+  # filter time frame
+  if (!base::is.null(start)) {
+    res <- dplyr::filter(res, date >= base::as.Date(start, format = "%m-%d-%Y"))
+  }
+  if (!base::is.null(end)) {
+    res <- dplyr::filter(res, date <= base::as.Date(end, format = "%m-%d-%Y"))
+  }
+
+  return(res)
+}
+
 # ==================== query 1 ====================
 
 #' Query 1
@@ -715,9 +751,7 @@ query4 <- function(plot_type = "static", start = "outbreak_start", end = "most_r
   validate_date_arg(end, "end")
 
   # validate var
-  if (! var %in% num_vars) {
-    stop(base::paste0("Argument var must be one of: ", base::paste0(num_vars, collapse = ", ")))
-  }
+  validate_num_var(var)
 
   # data wrangling
 
@@ -896,7 +930,7 @@ query4 <- function(plot_type = "static", start = "outbreak_start", end = "most_r
 #' @param end The end date of the time frame; by default (NULL) includes the most recent record in the OWID COVID dataset. Or specify any date string in the format "%m-%d-%Y" such as "07-22-2021".
 #' @param group_by "week" | "month" - further group time frame by week or month; NULL by default.
 #' @param bar_type "error" | "box" - if argument group_by is specified, produce either an error bar plot or box plot. Default: "error"
-#' @return Either a static map produced with ggplot2 or a dynamic one produced with leaflet.
+#' @return Either a static plot produced with ggplot2 or a dynamic one produced with plotly.
 #' @export
 query5 <- function(plot_type = "static", var = "new_cases", country = "United States",
                    start = NULL, end = NULL, group_by = NULL, bar_type = "error") {
@@ -905,26 +939,8 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
             group_by %in% c("week", "month"))
 
   # advanced argument validation
-  if (!var %in% num_vars) {
-    base::stop(base::paste0("var must be a numeric variable in the covid dataset: ",
-                            base::paste0(num_vars, collapse = ", ")))
-  }
-
-  diff <- dplyr::setdiff(country, base::unique(covid$location))
-
-  if (base::length(diff) > 0) {
-    base::stop(base::paste0("Invalid country name(s): ",
-                            base::paste0(diff, collapse = ", ")))
-  }
-
-  validate_date <- function(date, type) {
-    if (!base::is.null(date)) {
-      if (base::is.na(base::as.Date(date, "%m-%d-%Y"))) {
-        base::stop(base::paste0(type, " must be a date string in the format %m-%d-%Y"))
-      }
-    }
-  }
-
+  validate_num_var(var)
+  validate_country(country)
   validate_date(start, "start")
   validate_date(end, "end")
 
@@ -935,12 +951,7 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
     dplyr::select(location, date, .data[[var]])
 
   # filter time frame
-  if (!base::is.null(start)) {
-    res <- dplyr::filter(res, date >= base::as.Date(start, format = "%m-%d-%Y"))
-  }
-  if (!base::is.null(end)) {
-    res <- dplyr::filter(res, date <= base::as.Date(end, format = "%m-%d-%Y"))
-  }
+  res <- filter_time_frame(res, start, end)
   res <- dplyr::mutate(res, min_date = base::min(date), max_date = base::max(date))
 
   # group time frame
@@ -1058,5 +1069,88 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
     plotly::ggplotly(g, tooltip = dplyr::if_else(base::is.null(group_by), "all", "text")) %>%
       plotly::layout(hovermode = dplyr::if_else(bar_type == "error", "x", "closest"),
                      title = base::list(text = base::paste0(title, "<br>", "<sup>", subtitle, "</sup>")))
+  }
+}
+
+# ==================== query 6 ====================
+
+#' Query 6
+#'
+#' Produces a scatterplot of any two numeric variables from the OWID COVID dataset. Can subset dataset by specifying one or more countries, a time frame; if dataset is large, apply binning.
+#'
+#' @param plot_type "static" | "dynamic"
+#' @param x "new_cases" | "new_deaths" | "new_vaccinations" - or any other numeric variable in the OWID COVID dataset found here: \url{https://covid.ourworldindata.org/data/owid-covid-data.csv}
+#' @param y Any numeric variable other than x.
+#' @param country "United States" | "Canada" | "United Kingdom" - or any other country name.
+#' @param start The start date of the time frame; by default (NULL) starts from the first available record in the OWID COVID dataset. Or specify any date string in the format "%m-%d-%Y" such as "05-22-2020".
+#' @param end The end date of the time frame; by default (NULL) includes the most recent record in the OWID COVID dataset. Or specify any date string in the format "%m-%d-%Y" such as "07-22-2021".
+#' @param use_bins TRUE | FALSE - apply binning on the points?
+#' @return Either a static plot produced with ggplot2 or a dynamic one produced with plotly.
+#' @export
+query6 <- function(plot_type = "static", x = "new_cases", y = "new_deaths",
+                   country = "United States", start = NULL, end = NULL, use_bins = FALSE) {
+  # basic argument validation
+  base::stopifnot(plot_type %in% c("static", "dynamic"),
+            base::is.logical(use_bins))
+
+  # advanced argument validation
+  validate_num_var(x)
+  validate_num_var(y)
+  if (x == y) {
+    base::stop("x and y should be different")
+  }
+  validate_country(country)
+  validate_date(start)
+  validate_date(end)
+
+  # filter country
+  res <-
+    covid %>%
+    dplyr::filter(location %in% country) %>%
+    dplyr::select(location, date, .data[[x]], .data[[y]])
+
+  # filter time frame
+  res <- filter_time_frame(res, start, end)
+
+  # drop na
+  res <- tidyr::drop_na(res, .data[[x]], .data[[y]])
+
+  # plot
+  g <-
+    res %>%
+    ggplot2::ggplot(., ggplot2::aes(x = .data[[x]], y = .data[[y]]))
+
+  if (use_bins) {
+    g <- g + ggplot2::geom_hex()
+    title <- base::paste0("Binned Scatterplot of ", y, " vs ", x)
+  } else {
+    g <- g + ggplot2::geom_point()
+    title <- base::paste0("Scatterplot of ", y, " vs ", x)
+  }
+
+  if (base::length(country) == 1) {
+    title <- base::paste0(title, " for ", country)
+  }
+
+  if (base::length(country) > 1) {
+    g <- g + ggplot2::facet_wrap(~ location)
+  }
+
+  subtitle <- base::paste0(base::format(base::min(res$date), "%m/%d/%Y"), " - ",
+                     base::format(base::max(res$date), "%m/%d/%Y"))
+
+  g <-
+    g +
+    ggplot2::scale_fill_viridis_c() +
+    ggplot2::theme_bw() +
+    ggplot2::labs(title = title, subtitle = subtitle)
+
+  if (plot_type == "static") {
+    g
+  } else {
+    # fix subtitle offset issue
+    g <- g + ggplot2::theme(plot.margin = ggplot2::margin(0.8,0.5,0.5,0.8, "cm"))
+    plotly::ggplotly(g) %>%
+      plotly::layout(title = base::list(text = base::paste0(title, "<br>", "<sup>", subtitle, "</sup>")))
   }
 }

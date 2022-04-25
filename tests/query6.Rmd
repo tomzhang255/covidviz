@@ -1,0 +1,90 @@
+---
+title: "Query 6 Tests"
+author: "Siyuan (Tom) Zhang"
+date: '2022-04-25'
+output: html_document
+---
+
+## Intro
+
+Because functions give outputs as plots, unit testing would not work; manually testing each function instead.
+
+## Query 6
+
+### Expect success
+
+```{r}
+?query6
+```
+
+```{r}
+query6()
+```
+
+```{r}
+query6(plot_type = "static", x = "new_vaccinations", y = "new_deaths", country = "Canada",
+       start = "07-01-2021", end = "12-01-2021")
+```
+
+```{r}
+query6(plot_type = "static", x = "new_vaccinations", y = "new_deaths", country = "Canada",
+       start = "07-01-2021", end = "12-01-2021", use_bins = TRUE)
+```
+
+```{r}
+query6(plot_type = "dynamic", x = "new_vaccinations", y = "new_deaths", country = "Canada",
+       start = "07-01-2021", end = "12-01-2021")
+```
+
+```{r}
+query6(plot_type = "dynamic", x = "new_vaccinations", y = "new_deaths", country = "Canada",
+       start = "07-01-2021", end = "12-01-2021", use_bins = TRUE)
+```
+
+```{r}
+query6(plot_type = "static", x = "new_vaccinations", y = "new_deaths",
+       country = c("Canada", "United States", "Mexico"),
+       start = "07-01-2021", end = "12-01-2021")
+```
+
+```{r}
+query6(plot_type = "static", x = "new_vaccinations", y = "new_deaths",
+       country = c("Canada", "United States", "Mexico"),
+       start = "07-01-2021", end = "12-01-2021", use_bins = TRUE)
+```
+
+```{r}
+query6(plot_type = "dynamic", x = "new_vaccinations", y = "new_deaths",
+       country = c("Canada", "United States", "Mexico"),
+       start = "07-01-2021", end = "12-01-2021")
+```
+
+### Expect failure
+
+```{r}
+query6(plot_type = "invalid")
+```
+
+```{r}
+query6(x = "na")
+```
+
+```{r}
+query6(y = "species")
+```
+
+```{r}
+query6(country = "California")
+```
+
+```{r}
+query6(start = "a date")
+```
+
+```{r}
+query6(end = "2020/03/02")
+```
+
+```{r}
+query6(use_bins = 1)
+```
