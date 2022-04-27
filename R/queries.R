@@ -136,6 +136,16 @@ filter_time_frame <- function(res, start, end) {
   return(res)
 }
 
+validate_palette <- function(palette) {
+  palettes <- c("YlOrRd", "YlOrBr", "YlGnBu", "YlGn", "Reds", "RdPu",
+                "Purples", "PuRd", "PuBuGn", "PuBu", "OrRd", "Oranges",
+                "Greys", "Greens", "GnBu", "BuPu", "BuGn", "Blues")
+  if (!palette %in% palettes) {
+    base::stop(base::paste0("palette must be one of: ",
+                            base::paste0(palettes, collapse = ", ")))
+  }
+}
+
 # ==================== query 1 ====================
 
 #' Query 1
@@ -146,16 +156,18 @@ filter_time_frame <- function(res, start, end) {
 #' @param fill "cases" |"deaths" |"days" - The map will be filled by this variable.
 #' @param log_scale FALSE | TRUE - Apply a log transformation on the selected variable? Could be useful if variable contains outliers.
 #' @param projection "mercator" | "globular" | "gilbert"
+#' @param palette "YlOrBr" or any sequential palette from RColorBrewer: "YlOrRd", "YlOrBr", "YlGnBu", "YlGn", "Reds", "RdPu", "Purples", "PuRd", "PuBuGn", "PuBu", "OrRd", "Oranges", "Greys", "Greens", "GnBu", "BuPu", "BuGn", "Blues".
 #'
 #' @return Either a static map produced with ggplot2 or a dynamic one produced with leaflet.
 #' @export
 query1 <- function(plot_type = "static", fill = "cases",
-                   log_scale = FALSE, projection = "mercator") {
+                   log_scale = FALSE, projection = "mercator", palette = "YlOrBr") {
   # basic argument validation
   base::stopifnot(plot_type %in% c("static", "dynamic"),
             fill %in% c("cases", "deaths", "days"),
             base::is.logical(log_scale),
             projection %in% c("mercator", "globular", "gilbert"))
+  validate_palette(palette)
 
   # data wrangling
 
@@ -235,7 +247,7 @@ query1 <- function(plot_type = "static", fill = "cases",
       ggplot2::labs(title = base::paste0("World Map of ", fill_name(fill, log_scale), " by Country"),
            subtitle = "From Outbreak Start to First Peak of Stringency Index",
            fill = fill_name(fill, log_scale)) +
-      ggplot2::scale_fill_distiller(palette = "YlOrBr", direction = 1) +
+      ggplot2::scale_fill_distiller(palette = palette, direction = 1) +
       ggplot2::theme(
         axis.text = ggplot2::element_blank(),
         axis.ticks = ggplot2::element_blank(),
@@ -263,7 +275,7 @@ query1 <- function(plot_type = "static", fill = "cases",
     # palette
     vals <- transform(log_scale)(world_spdf@data[[fill]])
     vals <- base::replace(vals, vals == -Inf, 0)  # in case values are extreme
-    palette <- leaflet::colorNumeric("YlOrBr", vals, na.color = "transparent")
+    palette <- leaflet::colorNumeric(palette, vals, na.color = "transparent")
 
     # map
     leaflet::leaflet(world_spdf) %>%
@@ -298,11 +310,12 @@ query1 <- function(plot_type = "static", fill = "cases",
 #' @param fill "avg_daily_new_cases_pre_vac" | "avg_daily_new_cases_post_vac" | "avg_daily_new_deaths_pre_vac" | "avg_daily_new_deaths_post_vac" - The map will be filled by this variable.
 #' @param log_scale FALSE | TRUE - Apply a log transformation on the selected variable? Could be useful if variable contains outliers.
 #' @param projection "mercator" | "globular" | "gilbert"
+#' @param palette "YlOrBr" or any sequential palette from RColorBrewer: "YlOrRd", "YlOrBr", "YlGnBu", "YlGn", "Reds", "RdPu", "Purples", "PuRd", "PuBuGn", "PuBu", "OrRd", "Oranges", "Greys", "Greens", "GnBu", "BuPu", "BuGn", "Blues".
 #'
 #' @return Either a static map produced with ggplot2 or a dynamic one produced with leaflet.
 #' @export
 query2 <- function(plot_type = "static", fill = "avg_daily_new_cases_pre_vac",
-                   log_scale = FALSE, projection = "mercator") {
+                   log_scale = FALSE, projection = "mercator", palette = "YlOrBr") {
   # basic argument validation
   base::stopifnot(plot_type %in% c("static", "dynamic"),
             fill %in% c("avg_daily_new_cases_pre_vac",
@@ -311,6 +324,7 @@ query2 <- function(plot_type = "static", fill = "avg_daily_new_cases_pre_vac",
                         "avg_daily_new_deaths_post_vac"),
             base::is.logical(log_scale),
             projection %in% c("mercator", "globular", "gilbert"))
+  validate_palette(palette)
 
   # data wrangling
 
@@ -399,7 +413,7 @@ query2 <- function(plot_type = "static", fill = "avg_daily_new_cases_pre_vac",
       ggplot2::labs(title = base::paste0("World Map of ", fill_name(fill, log_scale), " by Country"),
            subtitle = "From Outbreak Start to Date of First Vaccine Dose Administered",
            fill = fill_name(fill, log_scale)) +
-      ggplot2::scale_fill_distiller(palette = "YlOrBr", direction = 1) +
+      ggplot2::scale_fill_distiller(palette = palette, direction = 1) +
       ggplot2::theme(
         axis.text = ggplot2::element_blank(),
         axis.ticks = ggplot2::element_blank(),
@@ -452,7 +466,7 @@ query2 <- function(plot_type = "static", fill = "avg_daily_new_cases_pre_vac",
     # palette
     vals <- transform(log_scale)(world_spdf@data[[fill]])
     vals <- base::replace(vals, vals == -Inf, 0)  # in case values are extreme
-    palette <- leaflet::colorNumeric("YlOrBr", vals, na.color = "transparent")
+    palette <- leaflet::colorNumeric(palette, vals, na.color = "transparent")
 
     # map
     leaflet::leaflet(world_spdf) %>%
@@ -487,16 +501,18 @@ query2 <- function(plot_type = "static", fill = "avg_daily_new_cases_pre_vac",
 #' @param fill "new_cases" | "new_deaths" | "new_vaccinations" - The map will be filled by this variable.
 #' @param log_scale FALSE | TRUE - Apply a log transformation on the selected variable? Could be useful if variable contains outliers.
 #' @param projection "mercator" | "globular" | "gilbert"
+#' @param palette "YlOrBr" or any sequential palette from RColorBrewer: "YlOrRd", "YlOrBr", "YlGnBu", "YlGn", "Reds", "RdPu", "Purples", "PuRd", "PuBuGn", "PuBu", "OrRd", "Oranges", "Greys", "Greens", "GnBu", "BuPu", "BuGn", "Blues".
 #'
 #' @return Either a static map produced with ggplot2 or a dynamic one produced with leaflet.
 #' @export
 query3 <- function(plot_type = "static", fill = "new_cases",
-                   log_scale = FALSE, projection = "mercator") {
+                   log_scale = FALSE, projection = "mercator", palette = "YlOrBr") {
   # basic argument validation
   base::stopifnot(plot_type %in% c("static", "dynamic"),
             fill %in% c("new_cases", "new_deaths", "new_vaccinations"),
             base::is.logical(log_scale),
             projection %in% c("mercator", "globular", "gilbert"))
+  validate_palette(palette)
 
   # data wrangling
 
@@ -615,7 +631,7 @@ query3 <- function(plot_type = "static", fill = "new_cases",
                           " Top Peak by Country"),
            subtitle = "Peaks Identified with loess()",
            fill = fill_name(fill, log_scale)) +
-      ggplot2::scale_fill_distiller(palette = "YlOrBr", direction = 1) +
+      ggplot2::scale_fill_distiller(palette = palette, direction = 1) +
       ggplot2::theme(
         axis.text = ggplot2::element_blank(),
         axis.ticks = ggplot2::element_blank(),
@@ -644,7 +660,7 @@ query3 <- function(plot_type = "static", fill = "new_cases",
     # palette
     vals <- transform(log_scale)(world_spdf@data$var_1)
     vals <- base::replace(vals, vals == -Inf, 0)  # in case values are extreme
-    palette <- leaflet::colorNumeric("YlOrBr", vals, na.color = "transparent")
+    palette <- leaflet::colorNumeric(palette, vals, na.color = "transparent")
 
     # map
     leaflet::leaflet(world_spdf) %>%
@@ -688,6 +704,7 @@ query3 <- function(plot_type = "static", fill = "new_cases",
 #' @param var "new_cases" | "new_deaths" | "new_vaccinations" - or any other numeric variable in the OWID COVID dataset found here: \url{https://covid.ourworldindata.org/data/owid-covid-data.csv}
 #' @param func "sum" | "mean" | "median" | "min" | "max"
 #' @param projection "mercator" | "globular" | "gilbert"
+#' @param palette "YlOrBr" or any sequential palette from RColorBrewer: "YlOrRd", "YlOrBr", "YlGnBu", "YlGn", "Reds", "RdPu", "Purples", "PuRd", "PuBuGn", "PuBu", "OrRd", "Oranges", "Greys", "Greens", "GnBu", "BuPu", "BuGn", "Blues".
 #'
 #' @return Either a static map produced with ggplot2 or a dynamic one produced with leaflet.
 #' @export
@@ -697,11 +714,13 @@ query3 <- function(plot_type = "static", fill = "new_cases",
 #' query4(plot_type = "dynamic", start = c("new_deaths" = 1000), end = "04-33-2021", var = "new_vaccinations", func = "median", projection = "gilbert")
 #' query4(plot_type = "dynamic", start = "03-03-2020", end = c("population" = 30000), var = "new_cases", func = "max", projection = "globular")
 query4 <- function(plot_type = "static", start = "outbreak_start", end = "most_recent",
-                   var = "new_cases", func = "sum", projection = "mercator") {
+                   var = "new_cases", func = "sum", projection = "mercator",
+                   palette = "YlOrBr") {
   # basic argument validation
   base::stopifnot(plot_type %in% c("static", "dynamic"),
             func %in% c("sum", "mean", "median", "min", "max"),
             projection %in% c("mercator", "globular", "gilbert"))
+  validate_palette(palette)
 
   # advanced argument validation
 
@@ -864,7 +883,7 @@ query4 <- function(plot_type = "static", start = "outbreak_start", end = "most_r
                           " by Country"),
            subtitle = "In Custom Time Frames",
            fill = prettify_aggregate_format(var, func)) +
-      ggplot2::scale_fill_distiller(palette = "YlOrBr", direction = 1) +
+      ggplot2::scale_fill_distiller(palette = palette, direction = 1) +
       ggplot2::theme(
         axis.text = ggplot2::element_blank(),
         axis.ticks = ggplot2::element_blank(),
@@ -892,7 +911,7 @@ query4 <- function(plot_type = "static", start = "outbreak_start", end = "most_r
       base::stop("Invalid timeframe.")
     }
 
-    palette <- leaflet::colorNumeric("YlOrBr", world_spdf@data$var_agg, na.color = "transparent")
+    palette <- leaflet::colorNumeric(palette, world_spdf@data$var_agg, na.color = "transparent")
 
     # map
     leaflet::leaflet(world_spdf) %>%
@@ -943,6 +962,9 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
   validate_country(country)
   validate_date(start, "start")
   validate_date(end, "end")
+  if (!base::is.null(group_by)) {
+    base::stopifnot(bar_type %in% c("error", "box"))
+  }
 
   # filter country
   res <-

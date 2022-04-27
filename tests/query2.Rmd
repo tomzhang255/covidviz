@@ -77,6 +77,14 @@ query2(plot_type = "dynamic", fill = "avg_daily_new_deaths_pre_vac", log_scale =
 query2(plot_type = "dynamic", fill = "avg_daily_new_deaths_post_vac", log_scale = TRUE, projection = "globular")
 ```
 
+```{r}
+query2(palette = "Blues")
+```
+
+```{r}
+query2(plot_type = "dynamic", palette = "Greens", log_scale = T)
+```
+
 ### Expect failure
 
 ```{r}
@@ -93,4 +101,8 @@ query2(log_scale = "t")
 
 ```{r}
 query2(projection = "none")
+```
+
+```{r}
+query2(palette = "gold")
 ```

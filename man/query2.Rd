@@ -8,7 +8,8 @@ query2(
   plot_type = "static",
   fill = "avg_daily_new_cases_pre_vac",
   log_scale = FALSE,
-  projection = "mercator"
+  projection = "mercator",
+  palette = "YlOrBr"
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ query2(
 \item{log_scale}{FALSE | TRUE - Apply a log transformation on the selected variable? Could be useful if variable contains outliers.}
 
 \item{projection}{"mercator" | "globular" | "gilbert"}
+
+\item{palette}{"YlOrBr" or any sequential palette from RColorBrewer: "YlOrRd", "YlOrBr", "YlGnBu", "YlGn", "Reds", "RdPu", "Purples", "PuRd", "PuBuGn", "PuBu", "OrRd", "Oranges", "Greys", "Greens", "GnBu", "BuPu", "BuGn", "Blues".}
 }
 \value{
 Either a static map produced with ggplot2 or a dynamic one produced with leaflet.

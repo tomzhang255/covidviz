@@ -64,6 +64,13 @@ query4(plot_type = "dynamic", start = c("new_deaths" = 1000), end = c("new_cases
 ```{r}
 query4(plot_type = "dynamic", start = "07-27-2020", end = "08-28-2020", var = "new_deaths", func = "median", projection = "globular")
 ```
+```{r}
+query4(palette = "Greys")
+```
+
+```{r}
+query4(plot_type = "dynamic", palette = "BuPu")
+```
 
 ### Expect failure
 
@@ -101,4 +108,8 @@ query4(func = "func")
 
 ```{r}
 query4(projection = "new_proj")
+```
+
+```{r}
+query4(palette = "boston housing")
 ```

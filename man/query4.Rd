@@ -10,7 +10,8 @@ query4(
   end = "most_recent",
   var = "new_cases",
   func = "sum",
-  projection = "mercator"
+  projection = "mercator",
+  palette = "YlOrBr"
 )
 }
 \arguments{
@@ -35,6 +36,8 @@ query4(
 \item{func}{"sum" | "mean" | "median" | "min" | "max"}
 
 \item{projection}{"mercator" | "globular" | "gilbert"}
+
+\item{palette}{"YlOrBr" or any sequential palette from RColorBrewer: "YlOrRd", "YlOrBr", "YlGnBu", "YlGn", "Reds", "RdPu", "Purples", "PuRd", "PuBuGn", "PuBu", "OrRd", "Oranges", "Greys", "Greens", "GnBu", "BuPu", "BuGn", "Blues".}
 }
 \value{
 Either a static map produced with ggplot2 or a dynamic one produced with leaflet.

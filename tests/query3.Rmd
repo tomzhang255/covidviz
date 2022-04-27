@@ -61,6 +61,14 @@ query3(plot_type = "dynamic", fill = "new_deaths", log_scale = TRUE)
 query3(plot_type = "dynamic", fill = "new_vaccinations", log_scale = TRUE, projection = "gilbert")
 ```
 
+```{r}
+query3(palette = "Purples")
+```
+
+```{r}
+query3(plot_type = "dynamic", palette = "PuBuGn", log_scale = T)
+```
+
 ### Expect failure
 
 ```{r}
@@ -77,4 +85,8 @@ query3(log_scale = 0)
 
 ```{r}
 query3(projection = "new")
+```
+
+```{r}
+query3(palette = "vintage")
 ```

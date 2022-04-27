@@ -78,6 +78,14 @@ query1(plot_type = "dynamic", fill = "deaths", log_scale = TRUE, projection = "g
 # should ignore projection for now
 ```
 
+```{r}
+query1(palette = "YlGnBu")
+```
+
+```{r}
+query1(plot_type = "dynamic", palette = "Reds", log_scale = T)
+```
+
 ### Expect failuire
 
 ```{r}
@@ -94,4 +102,8 @@ query1(log_scale = 1)
 
 ```{r}
 query1(projection = 9)
+```
+
+```{r}
+query1(palette = "rainbow")
 ```
