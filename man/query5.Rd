@@ -11,7 +11,8 @@ query5(
   start = NULL,
   end = NULL,
   group_by = NULL,
-  bar_type = "error"
+  bar_type = "error",
+  palette = NULL
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ query5(
 \item{group_by}{"week" | "month" - further group time frame by week or month; NULL by default.}
 
 \item{bar_type}{"error" | "box" - if argument group_by is specified, produce either an error bar plot or box plot. Default: "error"}
+
+\item{palette}{NULL (uses ggplot2's default palette) or any categorical palette from RColorBrewer: "Set3", "Set2", "Set1", "Pastel2", "Pastel1", "Paired", "Dark2", "Accent".}
 }
 \value{
 Either a static plot produced with ggplot2 or a dynamic one produced with plotly.

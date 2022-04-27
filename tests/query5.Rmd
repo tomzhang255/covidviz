@@ -109,6 +109,18 @@ query5(plot_type = "dynamic", var = "new_deaths", country = c("United States", "
        start = "03-28-2020", end = "07-26-2020", group_by = "month", bar_type = "box")
 ```
 
+```{r}
+query5(plot_type = "static", country = c("Canada", "Mexico"), palette = "Pastel2")
+```
+
+```{r}
+query5(plot_type = "dynamic", country = c("Canada", "China"), group_by = "month", palette = "Set2")
+```
+
+```{r}
+query5(plot_type = "dynamic", country = c("Canada", "Switzerland", "Greenland"), group_by = "month", palette = "Set2", bar_type = "box")
+```
+
 ### Expect failure
 
 ```{r}
@@ -129,4 +141,8 @@ query5(start = "today")
 
 ```{r}
 query5(end = "march, 2020")
+```
+
+```{r}
+query5(country = c("Canada", "United Kingdom", "Australia"), palette = "setosa")
 ```

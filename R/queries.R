@@ -136,10 +136,15 @@ filter_time_frame <- function(res, start, end) {
   return(res)
 }
 
-validate_palette <- function(palette) {
-  palettes <- c("YlOrRd", "YlOrBr", "YlGnBu", "YlGn", "Reds", "RdPu",
-                "Purples", "PuRd", "PuBuGn", "PuBu", "OrRd", "Oranges",
-                "Greys", "Greens", "GnBu", "BuPu", "BuGn", "Blues")
+validate_palette <- function(palette, type = "sequential") {
+  if (type == "sequential") {
+    palettes <- c("YlOrRd", "YlOrBr", "YlGnBu", "YlGn", "Reds", "RdPu",
+                  "Purples", "PuRd", "PuBuGn", "PuBu", "OrRd", "Oranges",
+                  "Greys", "Greens", "GnBu", "BuPu", "BuGn", "Blues")
+  } else if (type == "categorical") {
+    palettes <- c("Set3", "Set2", "Set1", "Pastel2", "Pastel1", "Paired", "Dark2", "Accent")
+  }
+
   if (!palette %in% palettes) {
     base::stop(base::paste0("palette must be one of: ",
                             base::paste0(palettes, collapse = ", ")))
@@ -949,10 +954,12 @@ query4 <- function(plot_type = "static", start = "outbreak_start", end = "most_r
 #' @param end The end date of the time frame; by default (NULL) includes the most recent record in the OWID COVID dataset. Or specify any date string in the format "%m-%d-%Y" such as "07-22-2021".
 #' @param group_by "week" | "month" - further group time frame by week or month; NULL by default.
 #' @param bar_type "error" | "box" - if argument group_by is specified, produce either an error bar plot or box plot. Default: "error"
+#' @param palette NULL (uses ggplot2's default palette) or any categorical palette from RColorBrewer: "Set3", "Set2", "Set1", "Pastel2", "Pastel1", "Paired", "Dark2", "Accent".
 #' @return Either a static plot produced with ggplot2 or a dynamic one produced with plotly.
 #' @export
 query5 <- function(plot_type = "static", var = "new_cases", country = "United States",
-                   start = NULL, end = NULL, group_by = NULL, bar_type = "error") {
+                   start = NULL, end = NULL, group_by = NULL, bar_type = "error",
+                   palette = NULL) {
   # basic argument validation
   base::stopifnot(plot_type %in% c("static", "dynamic"),
             group_by %in% c("week", "month"))
@@ -964,6 +971,9 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
   validate_date(end, "end")
   if (!base::is.null(group_by)) {
     base::stopifnot(bar_type %in% c("error", "box"))
+  }
+  if (base::length(country) > 1 & !base::is.null(palette)) {
+    validate_palette(palette, type = "categorical")
   }
 
   # filter country
@@ -1039,6 +1049,9 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
       g <- ggplot2::ggplot(res, ggplot2::aes(x = date, y = .data[[var]]))
     } else {
       g <- ggplot2::ggplot(res, ggplot2::aes(x = date, y = .data[[var]], color = location))
+      if (!base::is.null(palette)) {
+        g <- g + ggplot2::scale_color_brewer(palette = palette)
+      }
     }
 
     g <-
@@ -1056,6 +1069,9 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
         g <- ggplot2::ggplot(res, ggplot2::aes(x = forcats::fct_inorder(span),
                                                y = mean_var, color = location,
               text = tooltip_text(span, upper, mean_var, lower, country = location)))
+        if (!base::is.null(palette)) {
+          g <- g + ggplot2::scale_color_brewer(palette = palette)
+        }
       }
       g <- g +
         ggplot2::geom_point() +
@@ -1067,6 +1083,9 @@ query5 <- function(plot_type = "static", var = "new_cases", country = "United St
         g <- ggplot2::ggplot(res, ggplot2::aes(x = span, y = .data[[var]]))
       } else {
         g <- ggplot2::ggplot(res, ggplot2::aes(x = span, y = .data[[var]], fill = location))
+        if (!base::is.null(palette)) {
+          g <- g + ggplot2::scale_fill_brewer(palette = palette)
+        }
       }
       g <- g + ggplot2::geom_boxplot()
     }
