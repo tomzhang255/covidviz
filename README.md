@@ -31,15 +31,12 @@ library(covidviz)
 query1(plot_type = "static", fill = "cases", log_scale = TRUE, projection = "globular")
 ```
 
-<img src="man/figures/README-example-1.png" width="100%" />
+<img src="man/figures/README-example1-1.png" width="100%" />
 
 Plot outputs can be dynamic as well:
 
 ``` r
 query3(plot_type = "dynamic", log_scale = TRUE)
-#> Loading required package: sp
 ```
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
-
-TODO devtools::build_readme()
+<img src="man/figures/README-example2-1.png" width="100%" />

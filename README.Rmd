@@ -33,7 +33,7 @@ devtools::install_github("tomzhang255/covidviz")
 
 This is an example query:
 
-```{r example}
+```{r example1}
 library(covidviz)
 
 query1(plot_type = "static", fill = "cases", log_scale = TRUE, projection = "globular")
@@ -41,8 +41,10 @@ query1(plot_type = "static", fill = "cases", log_scale = TRUE, projection = "glo
 
 Plot outputs can be dynamic as well:
 
-```{r}
+```{r example2}
 query3(plot_type = "dynamic", log_scale = TRUE)
 ```
 
-TODO devtools::build_readme()
+```{r eval=FALSE, include=FALSE}
+# devtools::build_readme()
+```

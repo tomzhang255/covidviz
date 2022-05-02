@@ -1,0 +1,105 @@
+---
+title: "Demo"
+author: "Siyuan (Tom) Zhang"
+date: '2022-05-02'
+output: html_document
+---
+
+## Intro
+
+A demo of every function in this package.
+
+```{r}
+# devtools::install_github("tomzhang255/covidviz")
+library(covidviz)
+```
+
+## Query 1
+
+```{r}
+?query1
+```
+
+```{r}
+query1()
+```
+
+```{r}
+query1(log_scale = TRUE)
+```
+
+```{r}
+query1(log_scale = TRUE, projection = "gilbert")
+```
+
+```{r}
+query1(log_scale = TRUE, projection = "gilbert", palette = "YlGnBu")
+```
+
+```{r}
+query1(plot_type = "dynamic", log_scale = TRUE, projection = "gilbert", palette = "YlGnBu")
+```
+
+## Query 2
+
+```{r}
+?query2
+```
+
+```{r}
+query2(plot_type = "dynamic", fill = "avg_daily_new_cases_pre_vac", log_scale = TRUE, palette = "Greys")
+```
+
+## Query 3
+
+```{r}
+?query3
+```
+
+```{r}
+query3(plot_type = "dynamic", fill = "new_cases", log_scale = TRUE, palette = "YlOrRd")
+```
+
+## Query 4
+
+```{r}
+?query4
+```
+
+```{r}
+query4(plot_type = "dynamic", start = "05-22-2020", end = c("new_cases" = 100),
+       var = "new_cases", func = "mean", palette = "YlGn")
+```
+
+## Query 5
+
+```{r}
+?query5
+```
+
+```{r}
+query5(plot_type = "dynamic", var = "new_deaths", country = c("Norway", "Sweden", "Finland"),
+       start = "05-22-2020", end = "12-22-2020")
+```
+
+```{r}
+query5(plot_type = "dynamic", var = "new_deaths", country = c("Norway", "Sweden", "Finland"),
+       start = "05-22-2020", end = "12-22-2020", group_by = "month", bar_type = "error")
+```
+
+## Query 6
+
+```{r}
+?query6
+```
+
+```{r}
+query6(plot_type = "dynamic", x = "new_cases", "new_deaths", country = "Canada",
+       start = "04-01-2020", end = "11-01-2020")
+```
+
+```{r}
+query6(plot_type = "dynamic", x = "new_cases", "new_deaths", country = "Canada",
+       start = "04-01-2020", end = "11-01-2020", use_bins = TRUE)
+```
+
