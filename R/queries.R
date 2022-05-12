@@ -6,13 +6,8 @@ world_ggplot2 <- ggplot2::map_data("world")
 
 # world map shape file
 # download.file("http://thematicmapping.org/downloads/TM_WORLD_BORDERS_SIMPL-0.3.zip", destfile="data/world_shape_file.zip")
-# world_spdf <- rgdal::readOGR(
-#   # dsn="/Users/tomzhang/_R/covidviz/R/data/",
-#                              dsn=base::paste0(base::getwd(),"/inst/extdata/"),
-#                       layer="TM_WORLD_BORDERS_SIMPL-0.3",
-#                       verbose=FALSE)
 world_spdf <- rgdal::readOGR(
-  dsn=base::system.file("data", package = "covidviz"),
+  dsn=base::system.file("extdata", package = "covidviz"),
   layer="TM_WORLD_BORDERS_SIMPL-0.3",
   verbose=FALSE)
 

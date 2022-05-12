@@ -28,4 +28,5 @@ Imports:
     lubridate,
     forcats,
     readr,
-    maps
+    maps,
+    mapproj
