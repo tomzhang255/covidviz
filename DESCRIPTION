@@ -29,4 +29,5 @@ Imports:
     forcats,
     readr,
     maps,
-    mapproj
+    mapproj,
+    hexbin
