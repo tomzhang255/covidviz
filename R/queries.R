@@ -12,7 +12,7 @@ world_ggplot2 <- ggplot2::map_data("world")
 #                       layer="TM_WORLD_BORDERS_SIMPL-0.3",
 #                       verbose=FALSE)
 world_spdf <- rgdal::readOGR(
-  dsn=base::paste0(base::getwd(),"/data/"),
+  dsn=base::system.file("data", package = "covidviz"),
   layer="TM_WORLD_BORDERS_SIMPL-0.3",
   verbose=FALSE)
 
