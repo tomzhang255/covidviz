@@ -40,3 +40,6 @@ query3(plot_type = "dynamic", log_scale = TRUE)
 ```
 
 <img src="man/figures/README-example2-1.png" width="100%" />
+
+There are 6 such queries in total coded as functions. Inspect their
+documentation by issuing a command of the following form: `?query1`
