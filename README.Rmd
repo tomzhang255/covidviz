@@ -47,6 +47,7 @@ query3(plot_type = "dynamic", log_scale = TRUE)
 
 There are 6 such queries in total coded as functions. Inspect their documentation by issuing a command of the following form: `?query1`
 
+test/demo.Rmd contains a collection of function demos.
 
 ```{r eval=FALSE, include=FALSE}
 # devtools::build_readme()
