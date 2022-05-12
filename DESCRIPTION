@@ -27,4 +27,5 @@ Imports:
     sp,
     lubridate,
     forcats,
-    readr
+    readr,
+    maps
